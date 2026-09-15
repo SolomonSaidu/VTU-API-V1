@@ -1,0 +1,9 @@
+**<h3>Full Project Plan: V1/V2</h3>**
+
+---
+
+<br>
+
+1. **v1** would be using cronjob.org to ping the server to help keep it awake for the scheduling.
+
+2. **v2** would have payment provider like paystack for topups, and also would be using a vps server in that way keeping the server alive 247 in that way the schedule runs every time.

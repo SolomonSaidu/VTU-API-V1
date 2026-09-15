@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int    @id @default(autoincrement())
+  name    String  @db.VarChar(100) 
+  email   String  @unique
+  phone   String
+  passwordHash  String
+  wallet  Wallet?
+
+  transactions   Transaction[]
+}
+
+enum TransactionType {
+  AIRTIME
+  DATA
+  TOPUP
+}
+
+enum TransactionStatus {
+  SUCCESS
+  FAILED
+  PENDING
+  PROCESSING
+}
+
+model Transaction {
+  id     Int   @id @default(autoincrement())
+  type        TransactionType  
+  status      TransactionStatus
+  comment     String?
+
+  amount      Decimal
+  phone  String?
+  network  String?
+  PortedNumber  String?
+  airtimeType  String?
+  plan String?
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime?   @updatedAt
+  
+  userId      Int  
+  user        User @relation(fields: [userId], references: [id])
+  }
+
+
+  model Wallet {
+    id          Int   @id  @default(autoincrement())
+    userId      Int    @unique
+    balance     Decimal  @default(0)
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+
+    user        User         @relation(fields: [userId], references: [id], onDelete:Cascade)
+  }
