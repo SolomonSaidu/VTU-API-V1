@@ -23,6 +23,7 @@ model User {
   wallet  Wallet?
 
   transactions   Transaction[]
+  schedule       Schedule[]
 }
 
 enum TransactionType {
@@ -67,4 +68,39 @@ model Transaction {
     updatedAt   DateTime   @updatedAt
 
     user        User         @relation(fields: [userId], references: [id], onDelete:Cascade)
+  }
+
+
+  enum ScheduleStatus {
+    PENDING
+    PROCESSING
+    SUCCESS
+    FAILED
+  }
+
+  model Schedule {
+    id  Int @id @default(autoincrement())
+    userId      Int    @unique
+    user        User         @relation(fields: [userId], references: [id], onDelete:Cascade)
+
+    //Schedules
+    active  Boolean
+    frequency  String
+    timezone   String  @default("Africa/Lagos")
+    nextRunAt  DateTime
+    lastRunAt  DateTime?
+    lastStatus  ScheduleStatus  @default(PENDING)
+    failureCount  Int  @default(0)
+
+    //Airtime/Data purchase
+    type  TransactionType
+    amount        Decimal
+    phone         String?
+    network       String?
+    PortedNumber  String?
+    airtimeType   String?
+    plan          String?
+
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
   }
