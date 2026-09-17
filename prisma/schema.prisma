@@ -80,7 +80,7 @@ model Transaction {
 
   model Schedule {
     id  Int @id @default(autoincrement())
-    userId      Int    @unique
+    userId      Int    
     user        User         @relation(fields: [userId], references: [id], onDelete:Cascade)
 
     //Schedules
