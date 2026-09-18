@@ -14,6 +14,11 @@ route.get("/airtime/schedule", Authenticate, async (req, res, next) => {
       where: {
         userId,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: 0,
+      take: 10,
     });
 
     res.status(200).json({
@@ -26,7 +31,7 @@ route.get("/airtime/schedule", Authenticate, async (req, res, next) => {
 });
 
 route.post("/airtime/schedule", Authenticate, async (req, res, next) => {
-  const VALID_FREQUENCY = ["ONCE", "DAILY", "MONTHLY"];
+  const VALID_FREQUENCY = ["ONCE", "MINUTELY", "DAILY", "MONTHLY"];
 
   try {
     const userId = req.user.id;

@@ -15,17 +15,7 @@ const airtimeWorker = new Worker(
     try {
       const requestId = crypto.randomUUID();
       const transactionId = job.data.transactionId;
-      const scheduleId = job.data?.scheduleId;
-
-      // UPDATE SCHEDULE LAST RUN DATE TO NOW
-      await prisma.schedule.update({
-        where: {
-          id: scheduleId,
-        },
-        data: {
-          lastRunAt: DateTime.now().toUTC().toJSDate(),
-        },
-      });
+      //   const scheduleId = job.data?.scheduleId;
 
       // CHECK AND UPDATE TRANSACTION && WALLET
       const result = await prisma.$transaction(async (tx) => {
