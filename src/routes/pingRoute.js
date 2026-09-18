@@ -7,6 +7,23 @@ import { airtimeQueues } from "../queues/airtimeQueues.js";
 const route = express.Router();
 
 route.post("/schedule/ping", async (req, res) => {
+  //Convert status to pending if the frequency is not ONCE
+  await prisma.schedule.updateMany({
+    where: {
+      active: true,
+      frequency: {
+        not: "ONCE",
+      },
+      lastStatus: "PROCESSING",
+      lastRunAt: {
+        lt: DateTime.now().toUTC().toJSDate(),
+      },
+    },
+    data: {
+      lastStatus: "PENDING",
+    },
+  });
+
   //check (schedule) if the active is true in schedule
   //and also the nextRun if its now or has passed
   const activeShedule = await prisma.schedule.findMany({
@@ -60,6 +77,7 @@ route.post("/schedule/ping", async (req, res) => {
     if (transaction.type == "AIRTIME") {
       await airtimeQueues.add("buy-airtime", {
         transactionId: transaction.id,
+        scheduleId: schedule.id,
       });
     } else {
       // add for data

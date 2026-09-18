@@ -6,8 +6,23 @@ import AppError from "../utils/appError.js";
 
 const route = express.Router();
 
-route.get("/airtime/schedule", (req, res) => {
-  res.send("Schedules runnig...");
+route.get("/airtime/schedule", Authenticate, async (req, res, next) => {
+  const userId = req.user.id;
+
+  try {
+    const schedules = await prisma.schedule.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      schedules,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 route.post("/airtime/schedule", Authenticate, async (req, res, next) => {
