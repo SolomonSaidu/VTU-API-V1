@@ -81,6 +81,11 @@ route.post("/schedule/ping", async (req, res) => {
         scheduleId: schedule.id,
       });
     } else {
+      // Add to data data queue
+      await dataQueues.add("data", {
+        transactionId: transaction.id,
+        scheduleId: schedule.id,
+      });
     }
 
     // Calculating the next run
