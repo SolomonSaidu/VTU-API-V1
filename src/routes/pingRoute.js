@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import prisma from "../lib/prisma.js";
 import AppError from "../utils/appError.js";
 import { airtimeQueues } from "../queues/airtimeQueues.js";
+import { dataQueues } from "../queues/dataQueues.js";
 
 const route = express.Router();
 
@@ -73,14 +74,13 @@ route.post("/schedule/ping", async (req, res) => {
       },
     });
 
-    //all to queue
+    //Add to airtime queue
     if (transaction.type == "AIRTIME") {
       await airtimeQueues.add("buy-airtime", {
         transactionId: transaction.id,
         scheduleId: schedule.id,
       });
     } else {
-      // add for data
     }
 
     // Calculating the next run
@@ -99,11 +99,13 @@ route.post("/schedule/ping", async (req, res) => {
       });
     }
 
-    //calculation for minutely
+    //Calculation for minutely (For test only)
     if (schedule.frequency == "MINUTELY") {
-      const nextRun = DateTime.fromJSDate(schedule.nextRunAt).plus({
-        minute: 1,
-      });
+      let nextRun = DateTime.fromJSDate(schedule.nextRunAt);
+
+      while (nextRun <= now) {
+        nextRun = nextRun.plus({ minute: 1 });
+      }
 
       await prisma.schedule.update({
         where: {
@@ -119,7 +121,11 @@ route.post("/schedule/ping", async (req, res) => {
 
     //calculation for daily
     if (schedule.frequency == "DAILY") {
-      const nextRun = DateTime.fromJSDate(schedule.nextRunAt).plus({ day: 1 });
+      let nextRun = DateTime.fromJSDate(schedule.nextRunAt);
+
+      while (nextRun <= now) {
+        nextRun.plus({ day: 1 });
+      }
 
       await prisma.schedule.update({
         where: {
@@ -134,9 +140,13 @@ route.post("/schedule/ping", async (req, res) => {
     }
     //calculation for monthly
     if (schedule.frequency == "MONTHLY") {
-      const nextRun = DateTime.fromJSDate(schedule.nextRunAt).plus({
-        month: 1,
-      });
+      let nextRun = DateTime.fromJSDate(schedule.nextRunAt);
+
+      while (nextRun <= now) {
+        nextRun.plus({
+          month: 1,
+        });
+      }
 
       await prisma.schedule.update({
         where: {
@@ -160,9 +170,6 @@ route.post("/schedule/ping", async (req, res) => {
       amount: schedule.amount,
     })),
   });
-
-  //if all requement meet, then add a new transaction and also add (depending on the type, ie Airtime or data) job to airtime queue for the worker
-  // then respond 201
 });
 
 export default route;
