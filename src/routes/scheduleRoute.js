@@ -1,191 +1,20 @@
 import express from "express";
-import prisma from "../lib/prisma.js";
-import { DateTime } from "luxon";
 import { Authenticate } from "../middleware/authenticate.js";
-import AppError from "../utils/appError.js";
+import {
+  addAirtimeSchedule,
+  addDataSchedule,
+  deleteScheduleById,
+  getSchedule,
+} from "../controllers/scheduleController.js";
 
 const route = express.Router();
 
-route.get("/airtime/schedule", Authenticate, async (req, res, next) => {
-  const userId = req.user.id;
+route.get("/schedule", Authenticate, getSchedule);
 
-  try {
-    const schedules = await prisma.schedule.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      skip: 0,
-      take: 10,
-    });
+route.post("/airtime/schedule", Authenticate, addAirtimeSchedule);
 
-    res.status(200).json({
-      status: "success",
-      schedules,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+route.post("/data/schedule", Authenticate, addDataSchedule);
 
-route.post("/airtime/schedule", Authenticate, async (req, res, next) => {
-  const VALID_FREQUENCY = ["ONCE", "MINUTELY", "DAILY", "MONTHLY"];
-
-  try {
-    const userId = req.user.id;
-    const {
-      frequency,
-      year,
-      month,
-      day,
-      hour,
-      minute,
-
-      //Provider Data
-      type,
-      amount,
-      phone,
-      network,
-      PortedNumber,
-      airtimeType,
-    } = req.body;
-
-    if (!VALID_FREQUENCY.includes(frequency))
-      throw new AppError("Frequency must be ONCE, DAILY, or MONTHLY.", 400);
-
-    const scheduleDate = DateTime.fromObject(
-      {
-        year,
-        month,
-        day,
-        hour,
-        minute,
-      },
-      {
-        zone: "Africa/Lagos",
-      },
-    )
-      .toUTC()
-      .toJSDate();
-
-    if (scheduleDate <= DateTime.now().setZone("Africa/Lagos"))
-      throw new AppError("Schedule time must be in the future.", 400);
-
-    const Schedule = await prisma.schedule.create({
-      data: {
-        userId,
-        active: true,
-        frequency,
-        nextRunAt: scheduleDate,
-        type,
-        amount,
-        phone,
-        network,
-        PortedNumber,
-        airtimeType,
-      },
-    });
-
-    res.status(201).json({
-      status: "success",
-      message: "Schedule created successfuly.",
-      Schedule,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-route.post("/data/schedule", Authenticate, async (req, res, next) => {
-  const VALID_FREQUENCY = ["ONCE", "MINUTELY", "DAILY", "MONTHLY"];
-
-  try {
-    const userId = req.user.id;
-    const {
-      frequency,
-      year,
-      month,
-      day,
-      hour,
-      minute,
-
-      //Provider Data
-      type,
-      amount,
-      phone,
-      network,
-      PortedNumber,
-      airtimeType,
-      plan,
-    } = req.body;
-
-    if (!VALID_FREQUENCY.includes(frequency))
-      throw new AppError("Frequency must be ONCE, DAILY, or MONTHLY.", 400);
-
-    const scheduleDate = DateTime.fromObject(
-      {
-        year,
-        month,
-        day,
-        hour,
-        minute,
-      },
-      {
-        zone: "Africa/Lagos",
-      },
-    )
-      .toUTC()
-      .toJSDate();
-
-    if (scheduleDate <= DateTime.now().setZone("Africa/Lagos"))
-      throw new AppError("Schedule time must be in the future.", 400);
-
-    const Schedule = await prisma.schedule.create({
-      data: {
-        userId,
-        active: true,
-        frequency,
-        nextRunAt: scheduleDate,
-        type,
-        amount,
-        phone,
-        network,
-        PortedNumber,
-        airtimeType,
-        plan,
-      },
-    });
-
-    res.status(201).json({
-      status: "success",
-      message: "Schedule created successfuly.",
-      Schedule,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-route.delete("/delete/schedule/:id", async (req, res, next) => {
-  const { id } = req.params;
-  const scheduleId = parseInt(id);
-
-  try {
-    await prisma.schedule.delete({
-      where: {
-        id: scheduleId,
-      },
-    });
-
-    res.status(201).send({
-      status: "success",
-      message: `Scheddule with id ${scheduleId} has been deleted successfuly.`,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+route.delete("/delete/schedule/:id", deleteScheduleById);
 
 export default route;
