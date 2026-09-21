@@ -6,7 +6,7 @@ const AirtimeSchema = z.object({
     .string()
     .regex(/^\d{11}$/, "Phone number must be 11 digit long."),
   Ported_number: z.enum(
-    ["True", "Fales"],
+    ["True", "False"],
     "Ported number should be a string of type (True/Fales).",
   ),
   amount: z
