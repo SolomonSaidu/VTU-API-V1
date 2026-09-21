@@ -168,4 +168,24 @@ route.post("/data/schedule", Authenticate, async (req, res, next) => {
   }
 });
 
+route.delete("/delete/schedule/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const scheduleId = parseInt(id);
+
+  try {
+    await prisma.schedule.delete({
+      where: {
+        id: scheduleId,
+      },
+    });
+
+    res.status(201).send({
+      status: "success",
+      message: `Scheddule with id ${scheduleId} has been deleted successfuly.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default route;
