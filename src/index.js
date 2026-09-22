@@ -8,7 +8,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import wallet from "./routes/walletRoutes.js";
 import Schedule from "./routes/scheduleRoute.js";
 import Ping from "./routes/pingRoute.js";
-import Test from "./routes/testRoute.js";
+// import Test from "./routes/testRoute.js";
 import "./worker/airtimeWorker.js";
 import "./worker/dataWorker.js";
 
@@ -23,7 +23,7 @@ app.use(`/api/${version}`, data);
 app.use(`/api/${version}`, transactions);
 app.use(`/api/${version}`, Schedule);
 app.use(`/api/${version}`, Ping);
-app.use(`/api/${version}`, Test);
+// app.use(`/api/${version}`, Test);
 app.use(errorHandler);
 
 app.get("/api", (req, res) => {
